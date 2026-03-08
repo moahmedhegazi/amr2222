@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Can You Forgive Me, Amira?</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
 body{
     margin:0;
@@ -11,7 +12,7 @@ body{
     text-align:center;
     font-family:Arial, sans-serif;
     background:linear-gradient(to bottom,#ffccd5,#ffe6f0);
-    transition:0.2s;
+    transition:0.3s;
 }
 
 h1{
@@ -53,9 +54,39 @@ button{
     margin-top:200px;
 }
 
-/* shake effect */
+#warning, #boss{
+    display:none;
+    position:fixed;
+    top:35%;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:35px;
+    background:white;
+    padding:20px 40px;
+    border-radius:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+    z-index:999;
+}
+
+#warning img{
+    width:200px;
+    display:block;
+    margin:10px auto 0;
+}
+
+#boss{
+    background:black;
+    color:red;
+    font-size:50px;
+    padding:40px 60px;
+}
+
+.dark{
+    background:black !important;
+}
+
 .shake{
-    animation:shake 0.3s;
+    animation:shake 0.3s infinite;
 }
 @keyframes shake{
     0%{transform:translateX(0);}
@@ -65,7 +96,6 @@ button{
     100%{transform:translateX(0);}
 }
 
-/* floating hearts */
 .heart{
     position:absolute;
     color:red;
@@ -78,6 +108,7 @@ button{
 }
 </style>
 </head>
+
 <body>
 
 <h1>Can you forgive me, Amira? 💔</h1>
@@ -88,8 +119,15 @@ button{
 <button id="no">No 💔</button>
 </div>
 
-<div id="message">
-You made the perfect choice Amira 😍❤️🎉
+<div id="message"></div>
+
+<div id="warning">
+Don't mess with me 😎
+<img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ291amJraTRkMGNyNGZ0NWh5MWg3NWdldmN1eXcybGRhaTdkcjZucyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0Iy7k21Sw2LUkDkc/giphy.gif">
+</div>
+
+<div id="boss">
+FINAL WARNING 😈
 </div>
 
 <script>
@@ -97,30 +135,50 @@ const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
 const message = document.getElementById("message");
 const attemptsText = document.getElementById("attempts");
+const warning = document.getElementById("warning");
+const boss = document.getElementById("boss");
 
 let attempts = 0;
 let yesScale = 1;
 
-// No button behavior
-noBtn.addEventListener("mouseover", ()=>{
+function moveNoButton() {
+
     attempts++;
     attemptsText.innerHTML = "Seriously Amira? Attempt #" + attempts + " 😅";
 
-    // move randomly faster
-    const x = Math.random() * (window.innerWidth - 120);
-    const y = Math.random() * (window.innerHeight - 60);
+    // Attempt 3 → Funny warning
+    if(attempts === 3){
+        warning.style.display="block";
+        setTimeout(()=>{ warning.style.display="none"; },2000);
+    }
+
+    // Attempt 5 → Boss Mode
+    if(attempts === 5){
+        document.body.classList.add("dark","shake");
+        boss.style.display="block";
+
+        if(navigator.vibrate){
+            navigator.vibrate([200,100,200]);
+        }
+
+        setTimeout(()=>{
+            document.body.classList.remove("dark","shake");
+            boss.style.display="none";
+        },2000);
+    }
+
+    const btnWidth = noBtn.offsetWidth;
+    const btnHeight = noBtn.offsetHeight;
+
+    const x = Math.random() * (window.innerWidth - btnWidth);
+    const y = Math.random() * (window.innerHeight - btnHeight);
+
     noBtn.style.left = x + "px";
     noBtn.style.top = y + "px";
 
-    // grow Yes button
     yesScale += 0.25;
     yesBtn.style.transform = "scale(" + yesScale + ")";
 
-    // shake screen
-    document.body.classList.add("shake");
-    setTimeout(()=>document.body.classList.remove("shake"),300);
-
-    // if too many attempts → Yes fills screen
     if(attempts >= 6){
         yesBtn.style.position="fixed";
         yesBtn.style.top="0";
@@ -130,36 +188,35 @@ noBtn.addEventListener("mouseover", ()=>{
         yesBtn.style.fontSize="60px";
         yesBtn.innerHTML="Just Press YES ❤️";
     }
+}
+
+noBtn.addEventListener("mouseover", moveNoButton);
+noBtn.addEventListener("touchstart", function(e){
+    e.preventDefault();
+    moveNoButton();
 });
 
-// Yes click
 yesBtn.addEventListener("click", ()=>{
-    document.body.innerHTML="<h1 style='margin-top:200px;font-size:50px;color:#e60073;'>Best Decision Ever Amira 😍❤️🎉</h1>";
+    yesBtn.style.display="none";
+    noBtn.style.display="none";
+    attemptsText.style.display="none";
 
-    // massive confetti
-    var duration = 3 * 1000;
-    var end = Date.now() + duration;
+    message.style.display="block";
+    message.innerHTML = "Best Decision Ever Ya Ktkoty Love You 😍❤️🎉";
 
-    (function frame() {
-        confetti({
-            particleCount: 5,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 }
-        });
-        confetti({
-            particleCount: 5,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 }
-        });
-        if (Date.now() < end) {
-            requestAnimationFrame(frame);
-        }
-    }());
+    const gif = document.createElement("img");
+    gif.src = "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmhpMmpranB0ajQ4MXU2cGxrN29lODV5NnJ2cWRxbnF0anRidnR2aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT9IgKWQeoclWggTDO/giphy.gif";
+    gif.style.width = "250px";
+    gif.style.marginTop = "20px";
+    document.body.appendChild(gif);
+
+    confetti({
+        particleCount: 300,
+        spread: 150,
+        origin: { y: 0.6 }
+    });
 });
 
-// floating hearts
 function createHeart(){
     const heart = document.createElement("div");
     heart.classList.add("heart");
@@ -174,3 +231,5 @@ setInterval(createHeart,400);
 
 </body>
 </html>
+
+
